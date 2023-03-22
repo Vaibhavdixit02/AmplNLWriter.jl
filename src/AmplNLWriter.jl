@@ -5,8 +5,23 @@
 
 module AmplNLWriter
 
+import LinearAlgebra
 import MathOptInterface as MOI
 import OpenBLAS32_jll
+
+function __init__()
+    if VERSION >= v"1.8"
+        config = LinearAlgebra.BLAS.lbt_get_config()
+        if !any(lib -> lib.interface == :lp64, config.loaded_libs)
+            LinearAlgebra.BLAS.lbt_forward(
+                OpenBLAS32_jll.libopenblas_path;
+                verbose = false,
+                clear = false,
+            )
+        end
+    end
+    return
+end
 
 """
     AbstractSolverCommand
@@ -51,7 +66,8 @@ function call_solver(
         # Solvers like Ipopt_jll use libblastrampoline. That requires us to set
         # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
         # Provide a default in case the user doesn't set.
-        blas = OpenBLAS32_jll.libopenblas
+        config = LinearAlgebra.BLAS.get_config()
+        blas = join([lib.libname for lib in config.loaded_libs], ";")
         solver_cmd = pipeline(
             addenv(
                 `$(solver_path) $(nl_filename) -AMPL $(options)`,
