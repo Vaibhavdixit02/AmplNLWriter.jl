@@ -12,6 +12,8 @@ import AmplNLWriter
 const MOI = AmplNLWriter.MOI
 
 function runtests(path)
+    _test_error(path)
+    return
     for name in names(@__MODULE__; all = true)
         if !startswith("$(name)", "test_")
             continue
@@ -20,6 +22,17 @@ function runtests(path)
             getfield(@__MODULE__, name)(path)
         end
     end
+    return
+end
+
+function _test_error(path)
+    model = optimizer(path)
+    MOI.set(model, MOI.RawOptimizerAttribute("print_level"), 1)
+    x = MOI.add_variable(model)
+    MOI.add_constraint(model, x, MOI.GreaterThan(0.0))
+    MOI.optimize!(model)
+    @show MOI.get(model, MOI.RawStatusString())
+    return
 end
 
 function optimizer(path, args...; kwargs...)
