@@ -6,6 +6,7 @@
 module AmplNLWriter
 
 import MathOptInterface as MOI
+import OpenBLAS32_jll
 
 """
     AbstractSolverCommand
@@ -47,13 +48,19 @@ function call_solver(
     stdout::IO,
 )
     solver.f() do solver_path
-        ret = run(
-            pipeline(
+        # Solvers like Ipopt_jll use libblastrampoline. That requires us to set
+        # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
+        # Provide a default in case the user doesn't set.
+        blas = OpenBLAS32_jll.libopenblas
+        solver_cmd = pipeline(
+            addenv(
                 `$(solver_path) $(nl_filename) -AMPL $(options)`,
-                stdin = stdin,
-                stdout = stdout,
-            ),
+                "LBT_DEFAULT_LIBS" => get(ENV, "LBT_DEFAULT_LIBS", blas),
+            );
+            stdin = stdin,
+            stdout = stdout,
         )
+        ret = run(solver_cmd)
         if ret.exitcode != 0
             error("Nonzero exit code: $(ret.exitcode)")
         end
