@@ -66,7 +66,7 @@ function call_solver(
         # Solvers like Ipopt_jll use libblastrampoline. That requires us to set
         # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
         # Provide a default in case the user doesn't set.
-        config = LinearAlgebra.BLAS.get_config()
+        config = LinearAlgebra.BLAS.lbt_get_config()
         blas = join([lib.libname for lib in config.loaded_libs], ";")
         solver_cmd = pipeline(
             addenv(
