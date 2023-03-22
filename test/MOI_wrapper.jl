@@ -24,7 +24,7 @@ end
 
 function optimizer(path, args...; kwargs...)
     model = AmplNLWriter.Optimizer(path, args...; kwargs...)
-    MOI.set(model, MOI.RawOptimizerAttribute("print_level"), 0)
+    # MOI.set(model, MOI.RawOptimizerAttribute("print_level"), 0)
     MOI.set(
         model,
         MOI.RawOptimizerAttribute("option_file_name"),
