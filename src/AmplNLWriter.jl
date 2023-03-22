@@ -60,7 +60,7 @@ end
 else
     function _get_blas_libs()
         config = LinearAlgebra.BLAS.lbt_get_config()
-        return join([lib.libname for lib in config.loaded_libs], ";")
+        return join([rstrip(lib.libname, '\\') for lib in config.loaded_libs], ";")
     end
 end
 
