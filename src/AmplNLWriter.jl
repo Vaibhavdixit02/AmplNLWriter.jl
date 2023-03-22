@@ -76,6 +76,7 @@ function call_solver(
         # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
         # Provide a default in case the user doesn't set.
         lbt_default_libs = get(ENV, "LBT_DEFAULT_LIBS", _get_blas_libs())
+        @show lbt_default_libs
         solver_cmd = pipeline(
             addenv(
                 `$(solver_path) $(nl_filename) -AMPL $(options)`,
