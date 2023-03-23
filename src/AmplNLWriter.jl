@@ -76,15 +76,11 @@ function call_solver(
         # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
         # Provide a default in case the user doesn't set.
         lbt_default_libs = get(ENV, "LBT_DEFAULT_LIBS", _get_blas_libs())
-        solver_cmd = pipeline(
-            addenv(
-                `$(solver_path) $(nl_filename) -AMPL $(options)`,
-                "LBT_DEFAULT_LIBS" => lbt_default_libs,
-            );
-            stdin = stdin,
-            stdout = stdout,
-        )
-        ret = run(solver_cmd)
+        cmd = `$(solver_path) $(nl_filename) -AMPL $(options)`
+        if !isempty(lbt_default_libs)
+            cmd = addenv(cmd, "LBT_DEFAULT_LIBS" => lbt_default_libs)
+        end
+        ret = run(pipeline(cmd; stdin = stdin, stdout = stdout))
         if ret.exitcode != 0
             error("Nonzero exit code: $(ret.exitcode)")
         end
