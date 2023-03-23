@@ -55,12 +55,12 @@ struct _DefaultSolverCommand{F} <: AbstractSolverCommand
     f::F
 end
 
-@static if VERSION < v"1.8"
+@static if VERSION < v"1.8" || Sys.iswindows()
     _get_blas_libs() = ""
 else
     function _get_blas_libs()
         config = LinearAlgebra.BLAS.lbt_get_config()
-        return join([rstrip(lib.libname, '\\') for lib in config.loaded_libs], ";")
+        return join([lib.libname for lib in config.loaded_libs], ";")
     end
 end
 
@@ -76,7 +76,6 @@ function call_solver(
         # the BLAS library via the LBT_DEFAULT_LIBS environment variable.
         # Provide a default in case the user doesn't set.
         lbt_default_libs = get(ENV, "LBT_DEFAULT_LIBS", _get_blas_libs())
-        @show lbt_default_libs
         solver_cmd = pipeline(
             addenv(
                 `$(solver_path) $(nl_filename) -AMPL $(options)`,
