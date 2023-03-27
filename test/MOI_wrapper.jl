@@ -13,11 +13,11 @@ const MOI = AmplNLWriter.MOI
 
 function runtests(path)
     path() do exe
-        run(`$exe -v`)
-    end
-    path() do exe
         lbt_default_libs = get(ENV, "LBT_DEFAULT_LIBS", AmplNLWriter._get_blas_libs())
         run(addenv(`$exe -v`, "LBT_DEFAULT_LIBS" => lbt_default_libs))
+    end
+    path() do exe
+        run(`$exe -v`)
     end
     _test_error(path)
     return
